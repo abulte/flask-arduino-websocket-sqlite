@@ -9,7 +9,7 @@
                 return false;                                                    
             });                                                                  
             if ("WebSocket" in window) {                                         
-                ws = new WebSocket("ws://udderweb.com:5000/api");                
+                ws = new WebSocket("ws://" + document.domain +":5000/api");                
                 ws.onmessage = function (evt) {                                  
                     $("#log").append("<p>"+evt.data+"</p>")                      
                 };                                                               
