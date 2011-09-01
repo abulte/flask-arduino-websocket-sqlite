@@ -10,7 +10,7 @@ def home():
                                                                                  
 @app.route('/api')                                                               
 def api():                                                                       
-    if request.environ.get('wsgi.w:ebsocket'):                                                                                                        
+    if request.environ.get('wsgi.websocket'):                                                                                                        
         ws = request.environ['wsgi.websocket']                                   
         while True:                                                              
             message = ws.wait()                                                  
