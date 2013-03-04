@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Copyright 2013 Alexandre Bulté <alexandre[at]bulte[dot]net>
 # 
@@ -25,21 +26,6 @@ DATABASE_TOBACCO = '../monitor_serial_git/temps_w_tobacco.db'
 
 def connect_db(database):
     return sqlite3.connect(database)
-
-# @app.before_request
-# def before_request():
-#     g.db = connect_db(DATABASE)
-#     g.db_salon = connect_db(DATABASE_SALON)
-#     g.db_tobacco = connect_db(DATABASE_TOBACCO)
-
-# @app.teardown_request
-# def teardown_request(exception):
-#     if hasattr(g, 'db'):
-#         g.db.close()    
-#     if hasattr(g, 'db_salon'):
-#         g.db_salon.close()
-#     if hasattr(g, 'db_tobacco'):
-#         g.db_salon.close()
 
 def query_db_orig(query, args=(), one=False):
     cur = g.db.execute(query, args)
