@@ -4,7 +4,6 @@
     <title>Temps & humidity</title>
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">   
-    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
     <script type="text/javascript" charset="utf-8">                              
@@ -15,8 +14,8 @@
                     console.log(msg.data);  
                     data = JSON.parse(msg.data);
                     $('#ts').html(data.latest[0])
-                    $('#temp').html(data.latest[1])
-                    $('#h1').html(data.latest[2])
+                    $('#temp').html(data.latest[1] + '°')
+                    $('#h1').html(data.latest[2] + '%')
                     $('#h2').html(data.latest[3])
                 };                                    
             } else {                                                             
@@ -28,11 +27,14 @@
 <body>
     <table class="table">
         <tr>
-            <td>Date</td>
-            <td>T°</td>
+            <td colspan="2"><h1 id="ts"></h1></td>
         </tr>
         <tr>
-            <td><h1 id="ts"></h1></td>
+            <td>XXX</td>
+            <td>T°c</td>
+        </tr>
+        <tr>
+            <td><h1></h1></td>
             <td><h1 id="temp"></h1></td>
         </tr>
         <tr>

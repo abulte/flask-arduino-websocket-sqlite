@@ -16,7 +16,7 @@ import datetime, json
 app = Flask(__name__)
 app.debug = True
 
-## DB STUF ##
+## DB STUFF ##
 import sqlite3
 from flask import g
 
