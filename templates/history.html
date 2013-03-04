@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>                                                                           
+<head>                                                                           
+    <title>Temps & humidity</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">           
+    <style type="text/css" title="currentStyle">
+        @import "http://mbraak.github.com/simple-data-grid/simple.datagrid.css";
+    </style>                                   
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://mbraak.github.com/simple-data-grid/simple.datagrid.js"></script>
+
+    <script type="text/javascript" charset="utf-8">                              
+        $(document).ready(function(){
+            if ("WebSocket" in window) {                                         
+                ws = new WebSocket("ws://" + document.domain + ':' + document.location.port + "/api");                
+                ws.onmessage = function (msg) {
+                    console.log(msg.data);  
+                    data = JSON.parse(msg.data);
+                    doTable(data.en_cours, 'example');
+                    doTable(data.salon, 'salon');
+                    doTable(data.tobacco, 'tobacco');
+                };                                    
+            } else {                                                             
+                alert("WebSocket not supported");                                
+            }                                                     
+        });
+
+        function doTable(data, name){
+            $('#' + name).simple_datagrid( {
+                data: data,
+                order_by: true,
+            } )
+        }
+                                                  
+    </script>                                                                    
+</head>                                                                          
+<body>
+    <a href="#tobacco">Tobacco</a>
+    <a href="#example">Temps</a>
+    <a href="#salon">Salon</a>
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span4">
+                <h2>w_Tobacco.db</h2>                                                            
+                <table id="tobacco">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Temp</th>
+                      <th>Hum</th>
+                      <th>Hum tobacco</th>
+                    </tr>
+                  </thead>
+                </table>
+            </div>            
+            <div class="span4">
+                <h2>Temps.db</h2>                                                            
+                <table id="example">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Temp</th>
+                      <th>Hum</th>
+                    </tr>
+                  </thead>
+                </table>
+            </div>
+            <div class="span4">
+                <h2>Salon.db</h2>                                                            
+                <table id="salon">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Temp</th>
+                      <th>Hum</th>
+                    </tr>
+                  </thead>
+                </table>
+            </div>                                 
+        </div>
+    </div>
+</body>                                                                          
+</html>                                  
