@@ -10,11 +10,14 @@
 from geventwebsocket.handler import WebSocketHandler
 from gevent.pywsgi import WSGIServer
 from flask import Flask, request, render_template, jsonify
+from gevent import monkey
 
-import datetime, json
+import datetime, json, time
 
 app = Flask(__name__)
 app.debug = True
+
+monkey.patch_all()
 
 ## DB STUFF ##
 import sqlite3
@@ -69,19 +72,14 @@ def history():
 def api_live():
     if request.environ.get('wsgi.websocket'):
         ws = request.environ['wsgi.websocket']
-        readings = query_db(DATABASE, 'SELECT * FROM readings ORDER BY ts DESC limit 1', convert_date=False)
-        readings_salon = query_db(DATABASE_SALON, 'SELECT * FROM readings ORDER BY ts DESC limit 1', convert_date=False)
-        readings_tobacco = query_db(DATABASE_TOBACCO, 'SELECT * FROM readings ORDER BY ts DESC limit 1', convert_date=False)
-        latest = 0
-        for r in [readings[0], readings_tobacco[0], readings_salon[0]]:
-            if r[0] > latest:
-                result = r
-                latest = r[0]
-        print result
-        result[0] = date_from_timestamp(result[0])
-        if len(result) < 4:
-            result.append('na')
-        ws.send(json.dumps({'latest': result}))
+        while True:
+            readings_tobacco = query_db(DATABASE_TOBACCO, 'SELECT * FROM readings ORDER BY ts DESC limit 1', convert_date=False)
+            result = readings_tobacco[0]
+            result[0] = date_from_timestamp(result[0])
+            if len(result) < 4:
+                result.append('na')
+            ws.send(json.dumps({'latest': result}))
+            time.sleep(10)
     return jsonify({'status': 'ok'})
 
 @app.route('/api')
