@@ -1,0 +1,19 @@
+<html>
+<head>
+
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script type="text/javascript" src="https://raw.github.com/abourget/gevent-socketio/master/examples/flask_chat/static/js/socketio/socket.io.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        socket = io.connect('/serial');
+        socket.emit('get_serial');
+        socket.on('results', function (msg) {
+            console.log(msg);
+        });
+    });
+    </script>
+</head>
+<body>
+Coucou
+</body>
+</html>
