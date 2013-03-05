@@ -11,12 +11,15 @@
             if ("WebSocket" in window) {                                         
                 ws = new WebSocket("ws://" + document.domain + ':' + document.location.port + "/api/live");                
                 ws.onmessage = function (msg) {
-                    console.log(msg.data);  
+                    console.log(msg.data);
                     data = JSON.parse(msg.data);
-                    $('#ts').html(data.latest[0])
-                    $('#temp').html(data.latest[1] + '°')
-                    $('#h1').html(data.latest[2] + '%')
-                    $('#h2').html(data.latest[3])
+                    if (data.error === undefined){
+                        $('#ts').html(data.latest[0])
+                        $('#temp').html(data.latest[1] + '°')
+                        $('#h1').html(data.latest[2] + '%')
+                        $('#h2').html(data.latest[3])                        
+                        $('#h2_avg').html(data.latest[4])                        
+                    }
                 };                                    
             } else {                                                             
                 alert("WebSocket not supported");                                
@@ -30,20 +33,20 @@
             <td colspan="2"><h1 id="ts"></h1></td>
         </tr>
         <tr>
-            <td>XXX</td>
             <td>T°c</td>
-        </tr>
-        <tr>
-            <td><h1></h1></td>
-            <td><h1 id="temp"></h1></td>
-        </tr>
-        <tr>
             <td>Hum. air</td>
-            <td>Hum. soil</td>
         </tr>
         <tr>
+            <td><h1 id="temp"></h1></td>
             <td><h1 id="h1"></h1></td>
+        </tr>
+        <tr>
+            <td>Hum. soil</td>
+            <td>Hum. soil avg</td>
+        </tr>
+        <tr>
             <td><h1 id="h2"></h1></td>
+            <td><h1 id="h2_avg"></h1></td>
         </tr>
     </table>
     <a href="/history">History</a>
