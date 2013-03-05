@@ -5,26 +5,34 @@
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">   
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://raw.github.com/abourget/gevent-socketio/master/examples/flask_chat/static/js/socketio/socket.io.min.js"></script>
 
     <script type="text/javascript" charset="utf-8">                              
-        $(document).ready(function(){
-            if ("WebSocket" in window) {                                         
-                ws = new WebSocket("ws://" + document.domain + ':' + document.location.port + "/api/live");                
-                ws.onmessage = function (msg) {
-                    console.log(msg.data);
-                    data = JSON.parse(msg.data);
-                    if (data.error === undefined){
-                        $('#ts').html(data.latest[0])
-                        $('#temp').html(data.latest[1] + '°')
-                        $('#h1').html(data.latest[2] + '%')
-                        $('#h2').html(data.latest[3])                        
-                        $('#h2_avg').html(data.latest[4])                        
-                    }
-                };                                    
-            } else {                                                             
-                alert("WebSocket not supported");                                
-            }                                                     
-        });                                       
+        $(function() {
+            socket = io.connect('/api/live');
+            socket.emit('get_serial');
+            socket.on('results', function (msg) {
+                console.log(msg);
+            });
+        });
+        // $(document).ready(function(){
+        //     if ("WebSocket" in window) {                                         
+        //         ws = new WebSocket("ws://" + document.domain + ':' + document.location.port + "/api/live");                
+        //         ws.onmessage = function (msg) {
+        //             console.log(msg.data);
+        //             data = JSON.parse(msg.data);
+        //             if (data.error === undefined){
+        //                 $('#ts').html(data.latest[0])
+        //                 $('#temp').html(data.latest[1] + '°')
+        //                 $('#h1').html(data.latest[2] + '%')
+        //                 $('#h2').html(data.latest[3])                        
+        //                 $('#h2_avg').html(data.latest[4])                        
+        //             }
+        //         };                                    
+        //     } else {                                                             
+        //         alert("WebSocket not supported");                                
+        //     }                                                     
+        // });                                       
     </script>                                                                    
 </head>                                                                          
 <body>

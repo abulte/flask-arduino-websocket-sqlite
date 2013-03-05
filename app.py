@@ -7,9 +7,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from geventwebsocket.handler import WebSocketHandler
-from gevent.pywsgi import WSGIServer
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, Response
 
 import datetime
 import json
@@ -17,7 +15,12 @@ import serial
 import collections
 import time
 
-import gevent
+from socketio.namespace import BaseNamespace
+from socketio.server import SocketIOServer
+from socketio import socketio_manage
+from gevent import monkey
+
+monkey.patch_all()
 
 app = Flask(__name__)
 app.debug = True
@@ -89,46 +92,32 @@ def make_result(values, hum_list):
     # send result through websocket
     return result, hum_list
 
-def _read_serial(ws):
-    input = ''
-    hum_list = collections.deque(maxlen=10)
+class SerialNamespace(BaseNamespace):
     ser = connect_serial()
-    # todo: exit loop when websocket disconnects?
-    # todo: timeout?
-    while True:
-        input += ser.read()
-        # gevent.sleep(0)
-        while input.find("\r\n") != -1:
-            chopped_line = input[:input.find("\r\n")]
-            input = input[input.find("\r\n")+2:]
-            if chopped_line.find('temperature') != -1:
-                values = chopped_line.split(' ')
-                if len(values) > 5:
-                    result, hum_list = make_result(values, hum_list)
-                    ws.send(json.dumps({'latest': result}))
+
+    def on_get_serial(self):
+        self.emit('results', 'start')
+        input = ''
+        hum_list = collections.deque(maxlen=10)
+        # ser = connect_serial()
+        # todo: exit loop when websocket disconnects?
+        # todo: timeout?
+        while True:
+            input += self.ser.read()
+            # gevent.sleep(0)
+            while input.find("\r\n") != -1:
+                chopped_line = input[:input.find("\r\n")]
+                print chopped_line
+                input = input[input.find("\r\n")+2:]
+                if chopped_line.find('temperature') != -1:
+                    values = chopped_line.split(' ')
+                    if len(values) > 5:
+                        result, hum_list = make_result(values, hum_list)
+                        self.emit('results', {'latest': result})
+                    else:
+                        self.emit('results', {'error':'wrong length of parsed line'})
                 else:
-                    ws.send(json.dumps({'error':'wrong length of parsed line'}))
-            else:
-                ws.send(json.dumps({'error':'wrong line format'}))
-
-
-def read_serial(ws):
-    ws.send(json.dumps('coucou'))
-    i = 0
-    while i < 60:
-        ws.send(json.dumps(i))
-        time.sleep(1)
-        i += 1
-    ws.send(json.dumps('end'))
-
-# get the latest measure
-# directly through serial
-@app.route('/api/live')
-def api_live():
-    if request.environ.get('wsgi.websocket'):
-        ws = request.environ['wsgi.websocket']
-        read_serial(ws)
-    return jsonify({'status': 'ok'})
+                    self.emit('results', {'error':'wrong line format'})
 
 @app.route('/api')
 def api():
@@ -140,6 +129,19 @@ def api():
         ws.send(json.dumps({'en_cours': readings, 'salon': readings_salon, 'tobacco' : readings_tobacco}))
     return jsonify({'status': 'ok'})
 
+@app.route('/socket.io/<path:remaining>')
+def socketio(remaining):
+    try:
+        socketio_manage(request.environ, {'/api/live': SerialNamespace}, request)
+    except:
+        app.logger.error("Exception while handling socketio connection",
+                         exc_info=True)
+    return Response()
+
 if __name__ == '__main__':
-    http_server = WSGIServer(('',80), app, handler_class=WebSocketHandler)
-    http_server.serve_forever()
+    ws = SocketIOServer(('0.0.0.0', 80), app, resource="socket.io", policy_server=False)
+    try:
+        ws.serve_forever()
+    except KeyboardInterrupt:
+        ws.stop()
+        print 'Bye'
